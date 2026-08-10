@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Local Data & Credentials (Prevent accidental leak)
+data/config.json
+data/sessions.json
+data/stream.log
+data/*.log
+*.log
+
+# Windows Shortcut
+*.lnk
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Scheduled Stream Server</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+  <!-- Background Glow FX -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <div class="app-container">
+    <!-- Navbar / Header -->
+    <header class="top-nav">
+      <div class="nav-brand">
+        <div class="brand-logo">
+          <i class="fa-brands fa-youtube"></i>
+        </div>
+        <div class="brand-text">
+          <h1>StreamYT <span>Pro</span></h1>
+          <p>PC Scheduled Live Streaming Server</p>
+        </div>
+      </div>
+
+      <div class="nav-center">
+        <div class="live-clock-card">
+          <span class="clock-label"><i class="fa-regular fa-clock"></i> WAKTU LOKAL PC</span>
+          <span class="clock-value" id="liveClock">--:--:--</span>
+          <span class="clock-date" id="liveDate">Memuat...</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button class="btn btn-secondary" id="btnOpenSettings" title="Pengaturan YouTube & Telegram">
+          <i class="fa-solid fa-gear"></i>
+          <span>Pengaturan</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="main-content">
+      
+      <!-- Top Section: Status Monitor & Telemetry -->
+      <section class="monitor-grid">
+        <!-- Live Status Card -->
+        <div class="card status-monitor-card" id="statusCard">
+          <div class="card-header">
+            <div class="status-indicator-wrapper">
+              <span class="status-beacon idle" id="statusBeacon"></span>
+              <h2 id="statusHeadline">MEMUAT STATUS...</h2>
+            </div>
+            <div class="status-controls">
+              <button class="btn btn-danger btn-sm" id="btnStopStream" style="display: none;">
+                <i class="fa-solid fa-stop"></i> Hentikan Live Sekarang
+              </button>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <!-- State: LIVE ACTIVE -->
+            <div class="live-active-view" id="liveActiveView" style="display: none;">
+              <div class="live-info-banner">
+                <div class="live-badge-anim">
+                  <span class="pulse-dot"></span> LIVE SEKARANG
+                </div>
+                <div class="live-session-info">
+                  <h3 id="liveSessionTitle">Nama Sesi</h3>
+                  <p id="liveSessionVideo"><i class="fa-regular fa-file-video"></i> <span>video.mp4</span></p>
+                </div>
+                <div class="live-timer-box">
+                  <span class="label">DURASI BERJALAN</span>
+                  <span class="value timer-text" id="liveUptime">00:00:00</span>
+                </div>
+              </div>
+
+              <!-- Telemetry Stats -->
+              <div class="telemetry-grid">
+                <div class="telemetry-item">
+                  <div class="tele-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                  <div class="tele-content">
+                    <span class="tele-label">BITRATE</span>
+                    <span class="tele-val" id="teleBitrate">0 kbits/s</span>
+                  </div>
+                </div>
+                <div class="telemetry-item">
+                  <div class="tele-icon"><i class="fa-solid fa-film"></i></div>
+                  <div class="tele-content">
+                    <span class="tele-label">FRAMERATE</span>
+                    <span class="tele-val" id="teleFps">0 FPS</span>
+                  </div>
+                </div>
+                <div class="telemetry-item">
+                  <div class="tele-icon"><i class="fa-solid fa-bolt"></i></div>
+                  <div class="tele-content">
+                    <span class="tele-label">SPEED</span>
+                    <span class="tele-val" id="teleSpeed">1.0x</span>
+                  </div>
+                </div>
+                <div class="telemetry-item">
+                  <div class="tele-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                  <div class="tele-content">
+                    <span class="tele-label">TIME PROCESSED</span>
+                    <span class="tele-val" id="teleTime">00:00:00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- State: IDLE / WAITING -->
+            <div class="idle-waiting-view" id="idleWaitingView">
+              <div class="next-stream-container" id="nextStreamBox">
+                <div class="next-stream-icon">
+                  <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <div class="next-stream-details">
+                  <span class="sub-label">JADWAL LIVE BERIKUTNYA</span>
+                  <h3 id="nextSessionName">Belum ada jadwal yang aktif</h3>
+                  <p id="nextSessionSchedule"><i class="fa-regular fa-clock"></i> <span>-</span></p>
+                </div>
+                <div class="countdown-box" id="countdownWrapper">
+                  <span class="countdown-label">WAKTU MUNDUR</span>
+                  <div class="countdown-digits" id="countdownDigits">--:--:--</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Middle Section: Sessions Scheduler List -->
+      <section class="sessions-section">
+        <div class="section-header">
+          <div class="section-title">
+            <i class="fa-solid fa-list-check"></i>
+            <h2>Daftar Jadwal Sesi YouTube</h2>
+            <span class="badge badge-count" id="sessionCountBadge">0 Sesi</span>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-secondary btn-sm" id="btnExportSessions" title="Download / Simpan Backup Semua Jadwal Sesi ke Berkas .JSON">
+              <i class="fa-solid fa-file-export"></i> Backup Sesi
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btnImportSessions" title="Upload / Muat Jadwal Sesi dari Berkas .JSON">
+              <i class="fa-solid fa-file-import"></i> Restore Sesi
+            </button>
+            <input type="file" id="importFileInput" accept=".json" style="display: none;">
+            <button class="btn btn-primary btn-sm" id="btnOpenAddSession">
+              <i class="fa-solid fa-plus"></i> Tambah Jadwal Sesi
+            </button>
+          </div>
+        </div>
+
+        <!-- Sessions Container -->
+        <div class="sessions-list" id="sessionsList">
+          <div class="loading-state">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <p>Memuat daftar sesi...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom Section: Live Log Viewer -->
+      <section class="logs-section">
+        <div class="section-header">
+          <div class="section-title">
+            <i class="fa-solid fa-terminal"></i>
+            <h2>Log Aktivitas & FFmpeg Streaming</h2>
+          </div>
+          <div class="section-actions">
+            <label class="toggle-control-sm">
+              <input type="checkbox" id="chkAutoScroll" checked>
+              <span>Auto-scroll</span>
+            </label>
+            <button class="btn btn-secondary btn-sm" id="btnRefreshLogs">
+              <i class="fa-solid fa-rotate-right"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="terminal-card">
+          <div class="terminal-body" id="terminalLogs">
+            <div class="log-line info">[SISTEM] Menunggu aktivitas...</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: Tambah / Edit Sesi -->
+  <div class="modal-overlay" id="sessionModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalSessionTitle"><i class="fa-solid fa-calendar-plus"></i> Tambah Jadwal Sesi</h3>
+        <button class="modal-close" id="btnCloseSessionModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="sessionForm">
+          <input type="hidden" id="formSessionId" value="">
+
+          <div class="form-group">
+            <label for="formSessionName">Nama Sesi <span class="req">*</span></label>
+            <input type="text" id="formSessionName" class="form-control" placeholder="Contoh: Live Pagi - Musik Relaksasi" required>
+          </div>
+
+          <div class="form-group">
+            <label for="formVideoPath">File Video (PC) <span class="req">*</span></label>
+            <div class="input-action-group">
+              <input type="text" id="formVideoPath" class="form-control" placeholder="D:\Videos\video_stream.mp4" required>
+              <button type="button" class="btn btn-secondary" id="btnBrowseVideo" title="Buka File Explorer PC">
+                <i class="fa-solid fa-folder-open"></i> Pilih File Video
+              </button>
+            </div>
+            <!-- Video Probe Preview Box -->
+            <div class="video-preview-badge" id="videoProbeBox" style="display: none;">
+              <i class="fa-solid fa-circle-check"></i>
+              <span id="videoProbeText">Resolusi: 1080p | Durasi: 01:30:00 | Ukuran: 1.2 GB</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="formStreamKey">YouTube Stream Key Sesi Ini <span class="req">*</span></label>
+            <div class="input-action-group">
+              <input type="password" id="formStreamKey" class="form-control" placeholder="Masukkan Stream Key YouTube khusus untuk video/sesi ini..." required>
+              <button type="button" class="btn btn-secondary" id="btnToggleFormKeyVisibility" title="Lihat/Sembunyikan Key">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+            <small class="form-hint">Dapatkan Stream Key unik ini saat membuat jadwal siaran live di YouTube Studio.</small>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="formStartTime">Jam Mulai (24 Jam) <span class="req">*</span></label>
+              <div class="input-icon-group">
+                <i class="fa-regular fa-clock"></i>
+                <input type="time" id="formStartTime" class="form-control" value="08:00" required>
+              </div>
+            </div>
+
+            <div class="form-group col">
+              <label for="formDuration">Durasi Sesi (Opsional)</label>
+              <div class="input-icon-group">
+                <i class="fa-solid fa-hourglass-start"></i>
+                <input type="text" id="formDuration" class="form-control" placeholder="03:00:00 (atau kosongkan)">
+              </div>
+              <small class="form-hint">Format <code>JJ:MM:DD</code> (contoh: <code>02:00:00</code>).</small>
+            </div>
+          </div>
+
+          <!-- Mode Streaming Selector -->
+          <div class="form-group">
+            <label>Mode Durasi & Looping</label>
+            <div class="mode-selector-grid">
+              <label class="mode-card">
+                <input type="radio" name="modeOption" id="modeA" value="A" checked>
+                <div class="mode-content">
+                  <div class="mode-header">
+                    <span class="mode-tag tag-a">Mode A</span>
+                    <strong>Sesuai Panjang Video</strong>
+                  </div>
+                  <p>Memutar video sekali sampai selesai apa adanya tanpa durasi/looping.</p>
+                </div>
+              </label>
+
+              <label class="mode-card">
+                <input type="radio" name="modeOption" id="modeB" value="B">
+                <div class="mode-content">
+                  <div class="mode-header">
+                    <span class="mode-tag tag-b">Mode B</span>
+                    <strong>Loop Video Sampai Durasi</strong>
+                  </div>
+                  <p>Video berulang terus otomatis sampai batas durasi tercapai.</p>
+                </div>
+              </label>
+
+              <label class="mode-card">
+                <input type="radio" name="modeOption" id="modeC" value="C">
+                <div class="mode-content">
+                  <div class="mode-header">
+                    <span class="mode-tag tag-c">Mode C</span>
+                    <strong>Batas Durasi (Tanpa Loop)</strong>
+                  </div>
+                  <p>Video dipotong tepat saat durasi tercapai tanpa pengulangan.</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Days selector -->
+          <div class="form-group">
+            <label>Hari Aktif</label>
+            <div class="days-selector" id="daysSelector">
+              <label class="day-chip"><input type="checkbox" value="0"><span>Sen</span></label>
+              <label class="day-chip"><input type="checkbox" value="1"><span>Sel</span></label>
+              <label class="day-chip"><input type="checkbox" value="2"><span>Rab</span></label>
+              <label class="day-chip"><input type="checkbox" value="3"><span>Kam</span></label>
+              <label class="day-chip"><input type="checkbox" value="4"><span>Jum</span></label>
+              <label class="day-chip"><input type="checkbox" value="5"><span>Sab</span></label>
+              <label class="day-chip"><input type="checkbox" value="6"><span>Min</span></label>
+              <button type="button" class="btn-link-sm" id="btnSelectAllDays">Pilih Semua</button>
+            </div>
+            <small class="form-hint">Jika tidak ada yang dipilih, sesi akan aktif setiap hari.</small>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelSession">Batal</button>
+            <button type="submit" class="btn btn-primary" id="btnSaveSession">
+              <i class="fa-solid fa-floppy-disk"></i> Simpan Sesi
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Local PC File Browser (Dual-Pane Explorer) -->
+  <div class="modal-overlay" id="browserModal">
+    <div class="modal-card modal-xl">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-folder-tree"></i> File Explorer Video PC</h3>
+        <button class="modal-close" id="btnCloseBrowserModal">&times;</button>
+      </div>
+      
+      <div class="browser-layout">
+        <!-- Sidebar Pintasan / Quick Access -->
+        <aside class="browser-sidebar">
+          <div class="sidebar-group">
+            <span class="sidebar-heading"><i class="fa-solid fa-star"></i> PINTASAN CEPAT</span>
+            <div class="sidebar-items" id="quickShortcutsList">
+              <button type="button" class="sidebar-item active" onclick="loadBrowserDir('__ROOT__')">
+                <i class="fa-solid fa-computer"></i> <span>Komputer (Drives)</span>
+              </button>
+              <!-- Pintasan dinamis di-inject via JS -->
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Explorer Pane -->
+        <div class="browser-main">
+          <!-- Top Bar: Nav, Breadcrumbs & Search -->
+          <div class="browser-toolbar">
+            <button class="btn btn-secondary btn-icon" id="btnBrowserUp" title="Kembali ke folder atas / Daftar Drive">
+              <i class="fa-solid fa-arrow-up"></i>
+            </button>
+            <div class="browser-breadcrumbs" id="browserBreadcrumbs">
+              <!-- Clickable breadcrumbs injected via JS -->
+            </div>
+            <div class="browser-search-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="browserSearchInput" placeholder="Filter video...">
+            </div>
+          </div>
+
+          <!-- Items View List -->
+          <div class="browser-file-list" id="browserFileList">
+            <!-- Items injected via JS -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnCloseBrowser">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Settings / Config (YouTube & Telegram) -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-sliders"></i> Pengaturan Sistem</h3>
+        <button class="modal-close" id="btnCloseSettingsModal">&times;</button>
+      </div>
+
+      <!-- Settings Tabs -->
+      <div class="settings-tabs-nav">
+        <button type="button" class="settings-tab-btn active" data-tab="tab-youtube">
+          <i class="fa-brands fa-youtube"></i> Siaran YouTube
+        </button>
+        <button type="button" class="settings-tab-btn" data-tab="tab-telegram">
+          <i class="fa-brands fa-telegram"></i> Notifikasi Telegram
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form id="settingsForm">
+          
+          <!-- TAB 1: YouTube Settings -->
+          <div class="settings-tab-pane active" id="tab-youtube">
+            <div class="form-group">
+              <label for="cfgRtmpUrl">YouTube RTMP URL</label>
+              <input type="text" id="cfgRtmpUrl" class="form-control" value="rtmp://a.rtmp.youtube.com/live2">
+              <small class="form-hint">URL Server RTMP resmi YouTube Live (default: <code>rtmp://a.rtmp.youtube.com/live2</code>).</small>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col">
+                <label for="cfgVideoPreset">Encoding Preset</label>
+                <select id="cfgVideoPreset" class="form-control">
+                  <option value="ultrafast">Ultrafast (CPU Sangat Ringan)</option>
+                  <option value="superfast">Superfast</option>
+                  <option value="veryfast" selected>Veryfast (Rekomendasi)</option>
+                  <option value="faster">Faster</option>
+                  <option value="fast">Fast</option>
+                  <option value="medium">Medium (Kualitas Tinggi)</option>
+                </select>
+              </div>
+
+              <div class="form-group col">
+                <label for="cfgVideoBitrate">Video Bitrate</label>
+                <select id="cfgVideoBitrate" class="form-control">
+                  <option value="2500k">2500 kbps (720p)</option>
+                  <option value="4500k" selected>4500 kbps (1080p Standar)</option>
+                  <option value="6000k">6000 kbps (1080p 60fps)</option>
+                  <option value="9000k">9000 kbps (2K / Kualitas Tinggi)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="cfgAudioBitrate">Audio Bitrate</label>
+              <select id="cfgAudioBitrate" class="form-control">
+                <option value="128k" selected>128 kbps (Standar YouTube)</option>
+                <option value="192k">192 kbps (Jernih)</option>
+                <option value="320k">320 kbps (Maksimal)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- TAB 2: Telegram Settings -->
+          <div class="settings-tab-pane" id="tab-telegram">
+            <div class="tg-enable-card">
+              <div class="tg-enable-info">
+                <i class="fa-brands fa-telegram tg-logo-icon"></i>
+                <div>
+                  <strong>Aktifkan Notifikasi Telegram</strong>
+                  <p>Kirim update otomatis ke HP Anda saat siaran live dimulai, selesai, atau error.</p>
+                </div>
+              </div>
+              <label class="switch-control">
+                <input type="checkbox" id="cfgTelegramEnabled">
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label for="cfgTelegramBotToken">Telegram Bot Token</label>
+              <div class="input-action-group">
+                <input type="password" id="cfgTelegramBotToken" class="form-control" placeholder="123456789:ABCdefGhIJKlmNoPQRstuVWXyz">
+                <button type="button" class="btn btn-secondary" id="btnToggleTgTokenVisibility" title="Lihat/Sembunyikan Token">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+              <small class="form-hint">Dapatkan token bot dengan membuat bot di Telegram via <code>@BotFather</code>.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="cfgTelegramChatId">Telegram Chat ID</label>
+              <input type="text" id="cfgTelegramChatId" class="form-control" placeholder="Contoh: 123456789 atau -100123456789">
+              <small class="form-hint">Dapatkan Chat ID Anda dengan mengirim pesan ke <code>@userinfobot</code> di Telegram.</small>
+            </div>
+
+            <div class="form-group">
+              <label>Pilihan Notifikasi yang Dikirim</label>
+              <div class="tg-events-list">
+                <label class="tg-event-checkbox">
+                  <input type="checkbox" id="cfgTgNotifyStart" checked>
+                  <span>🔴 Notifikasi saat Live Streaming <strong>DIMULAI</strong></span>
+                </label>
+                <label class="tg-event-checkbox">
+                  <input type="checkbox" id="cfgTgNotifyEnd" checked>
+                  <span>✅ Notifikasi saat Live Streaming <strong>SELESAI</strong></span>
+                </label>
+                <label class="tg-event-checkbox">
+                  <input type="checkbox" id="cfgTgNotifyError" checked>
+                  <span>⚠️ Notifikasi jika terjadi <strong>ERROR / Disconnect</strong></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="tg-test-box">
+              <button type="button" class="btn btn-secondary btn-sm" id="btnTestTelegram">
+                <i class="fa-paper-plane"></i> Kirim Pesan Uji Coba (Test)
+              </button>
+              <small class="form-hint">Pastikan Anda sudah klik <strong>/start</strong> pada bot Telegram Anda terlebih dahulu.</small>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelSettings">Batal</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-floppy-disk"></i> Simpan Pengaturan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

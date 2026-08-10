@@ -1,0 +1,14 @@
+{
+  "stream_key": "",
+  "rtmp_url": "rtmp://a.rtmp.youtube.com/live2",
+  "video_preset": "veryfast",
+  "video_bitrate": "4500k",
+  "audio_bitrate": "128k",
+  "check_interval_seconds": 2,
+  "telegram_enabled": false,
+  "telegram_bot_token": "",
+  "telegram_chat_id": "",
+  "telegram_notify_start": true,
+  "telegram_notify_end": true,
+  "telegram_notify_error": true
+}
