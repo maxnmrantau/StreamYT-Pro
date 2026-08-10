@@ -1,6 +1,8 @@
+<img width="947" height="712" alt="image" src="https://github.com/user-attachments/assets/cf27462a-dcac-4b91-ac11-f204d03a8c13" />
+
 <div align="center">
 
-# 🔴 StreamYT Pro
+# StreamYT Pro
 ### **Automated 24/7 Scheduled YouTube Live Streaming Server for PC**
 
 [![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
