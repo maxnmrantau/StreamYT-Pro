@@ -65,10 +65,13 @@ class BackgroundScheduler:
             raw_time = session.get("start_time", "").strip()
             session_id = session.get("id")
 
-            # Normalisasi format jam ke HH:MM (contoh: '8:0' -> '08:00')
+            # Normalisasi format jam ke HH:MM (contoh: '8:0' atau '08:00:00' -> '08:00')
             try:
-                h, m = map(int, raw_time.split(":"))
-                session_time = f"{h:02d}:{m:02d}"
+                parts = list(map(int, raw_time.split(":")))
+                if len(parts) >= 2:
+                    session_time = f"{parts[0]:02d}:{parts[1]:02d}"
+                else:
+                    session_time = raw_time
             except Exception:
                 session_time = raw_time
 
@@ -108,7 +111,11 @@ class BackgroundScheduler:
                     continue
 
                 try:
-                    h, m = map(int, s.get("start_time", "00:00").split(":"))
+                    raw_st = s.get("start_time", "00:00").strip()
+                    parts = list(map(int, raw_st.split(":")))
+                    if len(parts) < 2:
+                        continue
+                    h, m = parts[0], parts[1]
                     session_dt = datetime(check_date.year, check_date.month, check_date.day, h, m, 0)
                     
                     if session_dt > now:

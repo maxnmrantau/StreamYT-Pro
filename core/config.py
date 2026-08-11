@@ -246,7 +246,8 @@ def get_video_info(video_path: str) -> Dict[str, Any]:
         # Coba cek apakah ffmpeg ada di direktori yang sama
         ffmpeg_cmd = shutil.which("ffmpeg")
         if ffmpeg_cmd:
-            probe_candidate = os.path.join(os.path.dirname(ffmpeg_cmd), "ffprobe.exe")
+            probe_name = "ffprobe.exe" if sys.platform == "win32" else "ffprobe"
+            probe_candidate = os.path.join(os.path.dirname(ffmpeg_cmd), probe_name)
             if os.path.exists(probe_candidate):
                 ffprobe_cmd = probe_candidate
 

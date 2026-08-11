@@ -528,6 +528,7 @@ async def browse_files(req: BrowseRequest):
                         "is_drive": True
                     })
         else:
+            drives.append({"name": "Root (/)", "path": "/", "is_dir": True, "is_drive": True})
             drives.append({"name": "Home (~)", "path": os.path.expanduser("~"), "is_dir": True, "is_drive": True})
 
         return {
@@ -627,4 +628,4 @@ async def get_logs(limit: int = 100):
 if __name__ == "__main__":
     import uvicorn
     print("Memulai YouTube Streaming Server pada http://localhost:8000 ...")
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=False)

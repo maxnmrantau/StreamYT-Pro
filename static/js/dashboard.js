@@ -825,7 +825,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (formVideoPath) formVideoPath.value = filePath;
     validateVideoPath(filePath);
     closeModal(browserModal);
-    showToast('File video dipilih: ' + filePath.split('\\').pop(), 'success');
+    const fname = filePath.split(/[\/\\]/).pop();
+    showToast('File video dipilih: ' + fname, 'success');
   };
 
   if (btnCloseBrowserModal) btnCloseBrowserModal.addEventListener('click', () => closeModal(browserModal));

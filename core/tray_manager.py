@@ -130,8 +130,11 @@ class TrayManager:
             item('❌ Keluar & Tutup Server', self.exit_app)
         )
 
-        self.icon = pystray.Icon("StreamYT", image, "StreamYT Pro - YouTube Live Scheduler", menu)
-        self.icon.run()
+        try:
+            self.icon = pystray.Icon("StreamYT", image, "StreamYT Pro - YouTube Live Scheduler", menu)
+            self.icon.run()
+        except Exception as e:
+            add_log("WARN", f"System Tray tidak aktif di lingkungan ini: {e}", "SYSTEM")
 
     def start_in_background(self):
         t = threading.Thread(target=self.run_tray, daemon=True)
