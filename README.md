@@ -240,9 +240,3 @@ StreamYT-Pro/
 Proyek ini dilisensikan di bawah lisensi **[MIT License](LICENSE)** — bebas digunakan, dimodifikasi, dan didistribusikan untuk keperluan pribadi maupun komersial.
 
 ---
-
-<div align="center">
-
-Dibuat dengan ❤️ oleh [maxnmrantau](https://github.com/maxnmrantau)
-
-</div>
