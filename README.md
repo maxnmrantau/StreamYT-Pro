@@ -2,7 +2,7 @@
 
 <div align="center">
 
-# 🔴 StreamYT Pro
+# StreamYT Pro
 ### **Automated 24/7 Scheduled YouTube Live Streaming Server (Cross-Platform)**
 
 [![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
